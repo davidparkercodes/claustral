@@ -1,0 +1,37 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Build the CLI (local backend only)
+    cmds:
+      - go build -trimpath -o bin/claustral ./cmd/claustral
+
+  build:opentdf:
+    desc: Build the CLI with the OpenTDF backend
+    cmds:
+      - go build -trimpath -tags opentdf -o bin/claustral ./cmd/claustral
+
+  test:
+    desc: Run all tests with the race detector, with and without the opentdf tag
+    cmds:
+      - go test -race ./...
+      - go test -race -tags opentdf ./...
+
+  lint:
+    desc: gofmt check and go vet for both build variants
+    cmds:
+      - test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - go vet ./...
+      - go vet -tags opentdf ./...
+
+  cover:
+    desc: Test coverage report
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -func=coverage.out | tail -1
+
+  check:
+    desc: lint + test
+    cmds:
+      - task: lint
+      - task: test
